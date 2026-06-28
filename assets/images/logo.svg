@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <defs>
+    <!-- Multi-layer metal texture -->
+    <filter id="metal" x="-2%" y="-2%" width="104%" height="104%">
+      <feTurbulence type="fractalNoise" baseFrequency="2" numOctaves="8" seed="4" result="grain"/>
+      <feColorMatrix in="grain" type="saturate" values="0" result="grayGrain"/>
+      <feBlend in="SourceGraphic" in2="grayGrain" mode="overlay" result="grained"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="4" seed="12" result="stain"/>
+      <feColorMatrix in="stain" type="matrix"
+        values="0.6 0 0 0 0.05
+                0.3 0 0 0 0.01
+                0 0 0 0 0
+                0 0 0 0.3 0" result="rustStain"/>
+      <feBlend in="grained" in2="rustStain" mode="color-burn"/>
+    </filter>
+    <!-- Pitting / corrosion spots -->
+    <filter id="pitting">
+      <feTurbulence type="turbulence" baseFrequency="0.5" numOctaves="3" seed="7" result="pit"/>
+      <feColorMatrix in="pit" type="matrix"
+        values="0 0 0 0 0.12
+                0 0 0 0 0.06
+                0 0 0 0 0.02
+                0 0 0 6 -3" result="pitColor"/>
+      <feComposite in="pitColor" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <!-- Inward dent: light hits top-left edge of groove, shadow on bottom-right inside -->
+    <filter id="dent" x="-10%" y="-10%" width="120%" height="120%">
+      <!-- Shadow inside bottom-right -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="blur1"/>
+      <feOffset in="blur1" dx="-2" dy="-2.5" result="shOff"/>
+      <feFlood flood-color="#000000" flood-opacity="0.85"/>
+      <feComposite in2="shOff" operator="in" result="shadow"/>
+      <feComposite in="shadow" in2="SourceAlpha" operator="in" result="clippedShadow"/>
+      <!-- Light catching top-left rim of the groove -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="blur2"/>
+      <feOffset in="blur2" dx="2" dy="2.5" result="hlOff"/>
+      <feFlood flood-color="#d4a070" flood-opacity="0.45"/>
+      <feComposite in2="hlOff" operator="in" result="highlight"/>
+      <feComposite in="highlight" in2="SourceAlpha" operator="in" result="clippedHighlight"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="clippedShadow"/>
+        <feMergeNode in="clippedHighlight"/>
+      </feMerge>
+    </filter>
+    <!-- Directional lighting gradient -->
+    <linearGradient id="lightDir" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4885a; stop-opacity:0.25"/>
+      <stop offset="100%" style="stop-color:#1a0800; stop-opacity:0.3"/>
+    </linearGradient>
+    <!-- Clip to dogtag shape -->
+    <clipPath id="tagClip">
+      <rect x="14" y="36" width="172" height="264" rx="16" ry="16"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tagClip)">
+    <!-- Dog tag body -->
+    <rect x="14" y="36" width="172" height="264" rx="16" ry="16" fill="#865030" filter="url(#metal)"/>
+    <!-- Directional light overlay -->
+    <rect x="14" y="36" width="172" height="264" rx="16" ry="16" fill="url(#lightDir)"/>
+    <!-- Corrosion layer -->
+    <rect x="14" y="36" width="172" height="264" rx="16" ry="16" filter="url(#pitting)" opacity="0.6"/>
+  </g>
+
+  <!-- Chain hole -->
+  <circle cx="100" cy="56" r="9" fill="#080200"/>
+  <circle cx="100" cy="56" r="9" fill="none" stroke="#1c0800" stroke-width="2"/>
+
+  <!-- JUNK - dented inward, bold stencil -->
+  <text x="100" y="160" font-family="'Courier New', monospace" font-weight="900" font-size="48"
+        fill="#3a1505" text-anchor="middle" letter-spacing="2" filter="url(#dent)">JUNK</text>
+
+  <!-- ENGINE - dented inward, bold stencil -->
+  <text x="100" y="220" font-family="'Courier New', monospace" font-weight="900" font-size="34"
+        fill="#3a1505" text-anchor="middle" letter-spacing="4" filter="url(#dent)">ENGINE</text>
+
+  <!-- Surface imperfections -->
+  <line x1="22" y1="100" x2="58" y2="102" stroke="#1c0800" stroke-width="0.5" opacity="0.4"/>
+  <line x1="140" y1="88" x2="178" y2="85" stroke="#1c0800" stroke-width="0.4" opacity="0.35"/>
+  <line x1="20" y1="278" x2="48" y2="280" stroke="#1c0800" stroke-width="0.6" opacity="0.3"/>
+  <line x1="155" y1="270" x2="180" y2="267" stroke="#1c0800" stroke-width="0.4" opacity="0.25"/>
+  <!-- Dents -->
+  <circle cx="160" cy="120" r="3" fill="#3a1808" opacity="0.2"/>
+  <circle cx="35" cy="250" r="2" fill="#3a1808" opacity="0.15"/>
+</svg>
