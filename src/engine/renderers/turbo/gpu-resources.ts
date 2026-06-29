@@ -58,22 +58,24 @@ export function uploadMesh(device: GPUDevice, mesh: MeshData): GpuMeshBuffers {
 }
 
 /** 1×1 white RGBA pixel used as placeholder when a texture slot is unused. */
-let _placeholderTex: GPUTexture | null = null;
+const _placeholderTexMap = new WeakMap<GPUDevice, GPUTexture>();
 
 function getPlaceholderTexture(device: GPUDevice): GPUTexture {
-    if (_placeholderTex) return _placeholderTex;
-    _placeholderTex = device.createTexture({
+    let tex = _placeholderTexMap.get(device);
+    if (tex) return tex;
+    tex = device.createTexture({
         size: [1, 1],
         format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
     device.queue.writeTexture(
-        { texture: _placeholderTex },
+        { texture: tex },
         new Uint8Array([255, 255, 255, 255]),
         { bytesPerRow: 4 },
         [1, 1],
     );
-    return _placeholderTex;
+    _placeholderTexMap.set(device, tex);
+    return tex;
 }
 
 /** Uploads a TextureData to a GPUTexture. */

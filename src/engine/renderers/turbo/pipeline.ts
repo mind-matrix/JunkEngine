@@ -35,7 +35,7 @@ export interface TurboPipeline {
     height: number;
 }
 
-export function createTurboPipeline(device: GPUDevice, canvasFormat: GPUTextureFormat, width: number, height: number, sampleCount = 1): TurboPipeline {
+export function createTurboPipeline(device: GPUDevice, canvasFormat: GPUTextureFormat, width: number, height: number, sampleCount = 1, wireframe = false): TurboPipeline {
     const depthFormat: GPUTextureFormat = "depth32float";
 
     // --- Bind group layouts ---
@@ -79,7 +79,7 @@ export function createTurboPipeline(device: GPUDevice, canvasFormat: GPUTextureF
     };
 
     const primitive: GPUPrimitiveState = {
-        topology: "triangle-list",
+        topology: wireframe ? "line-list" : "triangle-list",
         cullMode: "none",
     };
 

@@ -81,6 +81,14 @@ export class TurboRenderer extends Renderer<GPUCanvasContext> {
     }
 
     private currentSampleCount = 1;
+    private _wireframe = false;
+
+    get wireframe(): boolean { return this._wireframe; }
+    set wireframe(value: boolean) {
+        if (value === this._wireframe) return;
+        this._wireframe = value;
+        this.turbo = createTurboPipeline(this.device, this.turbo.canvasFormat, this.canvas.width, this.canvas.height, this.currentSampleCount, value);
+    }
 
     private constructor(canvas: HTMLCanvasElement, context: GPUCanvasContext, device: GPUDevice, turbo: TurboPipeline) {
         super(canvas, context);
@@ -111,14 +119,19 @@ export class TurboRenderer extends Renderer<GPUCanvasContext> {
     resize(width: number, height: number): void {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.turbo = createTurboPipeline(this.device, this.turbo.canvasFormat, width, height, this.currentSampleCount);
+        this.turbo = createTurboPipeline(this.device, this.turbo.canvasFormat, width, height, this.currentSampleCount, this._wireframe);
     }
 
     static async create(canvas: HTMLCanvasElement): Promise<TurboRenderer> {
         if (!navigator.gpu) throw new Error("WebGPU not supported in this browser");
         const adapter = await navigator.gpu.requestAdapter();
         if (!adapter) throw new Error("Failed to get GPU adapter");
-        const device = await adapter.requestDevice();
+        const device = await adapter.requestDevice({
+            requiredLimits: {
+                maxBufferSize: adapter.limits.maxBufferSize,
+                maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
+            },
+        });
 
         const context = canvas.getContext("webgpu") as GPUCanvasContext | null;
         if (!context) throw new Error("Failed to get WebGPU context");

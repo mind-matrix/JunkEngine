@@ -53,6 +53,7 @@ const AMBIENT = 0.15;
  */
 export class CrankRenderer extends Renderer<CanvasRenderingContext2D> {
     private _depthMode: DepthMode = "zbuffer";
+    private _wireframe = false;
     private imageData: ImageData;
     private pixelBuffer: Uint8ClampedArray;
     private depthBuffer: Float32Array;
@@ -77,6 +78,9 @@ export class CrankRenderer extends Renderer<CanvasRenderingContext2D> {
     set depthMode(mode: DepthMode) {
         this._depthMode = mode;
     }
+
+    get wireframe(): boolean { return this._wireframe; }
+    set wireframe(value: boolean) { this._wireframe = value; }
 
     /** Fills the pixel buffer with the background color and resets the depth buffer. */
     clear(): void {
@@ -109,7 +113,9 @@ export class CrankRenderer extends Renderer<CanvasRenderingContext2D> {
             const material = scene.getMaterial(obj.materialId);
             const screenVerts = this.transformVertices(obj.mesh, mvp, obj.transform);
 
-            if (this._depthMode === "painter") {
+            if (this._wireframe) {
+                this.renderWireframe(obj.mesh, screenVerts);
+            } else if (this._depthMode === "painter") {
                 this.renderPainter(obj.mesh, screenVerts, material, lights);
             } else {
                 this.renderZBuffer(obj.mesh, screenVerts, material, lights);
@@ -187,6 +193,51 @@ export class CrankRenderer extends Renderer<CanvasRenderingContext2D> {
             const v2 = indexedVerts[tri.index + 2];
             if (v0 == null || v1 == null || v2 == null) continue;
             this.rasterizeTriangle(v0, v1, v2, material, true, lights);
+        }
+    }
+
+    private renderWireframe(mesh: MeshData, screenVerts: (ScreenVertex | null)[]): void {
+        for (let i = 0; i < mesh.indexCount; i += 3) {
+            const i0 = mesh.indices[i] ?? 0;
+            const i1 = mesh.indices[i + 1] ?? 0;
+            const i2 = mesh.indices[i + 2] ?? 0;
+            const v0 = screenVerts[i0];
+            const v1 = screenVerts[i1];
+            const v2 = screenVerts[i2];
+            if (v0 == null || v1 == null || v2 == null) continue;
+            this.drawLine(v0.sx, v0.sy, v1.sx, v1.sy);
+            this.drawLine(v1.sx, v1.sy, v2.sx, v2.sy);
+            this.drawLine(v2.sx, v2.sy, v0.sx, v0.sy);
+        }
+    }
+
+    private drawLine(x0: number, y0: number, x1: number, y1: number): void {
+        let dx = Math.abs(x1 - x0);
+        let dy = Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1;
+        const sy = y0 < y1 ? 1 : -1;
+        let err = dx - dy;
+        let x = Math.round(x0);
+        let y = Math.round(y0);
+        const ex = Math.round(x1);
+        const ey = Math.round(y1);
+
+        dx = Math.abs(ex - x);
+        dy = Math.abs(ey - y);
+        err = dx - dy;
+
+        while (true) {
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                const idx = (y * this.width + x) * 4;
+                this.pixelBuffer[idx] = 220;
+                this.pixelBuffer[idx + 1] = 220;
+                this.pixelBuffer[idx + 2] = 220;
+                this.pixelBuffer[idx + 3] = 255;
+            }
+            if (x === ex && y === ey) break;
+            const e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x += sx; }
+            if (e2 < dx) { err += dx; y += sy; }
         }
     }
 
