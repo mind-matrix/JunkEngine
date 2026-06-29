@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JunkEngine Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #111;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .hud {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+        }
+
+        .hud a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .hud a:hover {
+            background: rgba(0, 0, 0, 0.85);
+            border-color: #c45e2c;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            color: #ddd;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <div class="hud">
+        <a href=".">&larr; Back</a>
+    </div>
+    <div class="controls">
+        WASD move &middot; Mouse look (click to lock) &middot; Space up &middot; Shift down
+    </div>
+</body>
+</html>

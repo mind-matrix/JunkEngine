@@ -1,1 +1,1 @@
-export * from "./tank";
+import "./tank";

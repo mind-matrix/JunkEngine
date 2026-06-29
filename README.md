@@ -42,8 +42,6 @@ JunkEngine is a TypeScript-based rendering engine that supports both hardware-ac
 - WebGPU (WGSL shaders)
 - Webpack
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Rendering Engines
 
 JunkEngine ships with two renderers that share the same `Scene` interface.
@@ -85,8 +83,6 @@ renderer.depthMode = "zbuffer"; // or "painter"
 renderer.render(scene);
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Shading Modes
 
 The `Scene.shadingMode` property controls how the Turbo renderer shades geometry. Set it before or during the render loop -- it takes effect on the next frame.
@@ -109,7 +105,6 @@ The toon shader respects material properties:
 - Rough surfaces suppress specular and rim effects.
 - Post-process outlines use depth-buffer edge detection (Sobel + Roberts cross) with depth-adaptive thresholds.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Scene Management
 
@@ -168,7 +163,6 @@ document.addEventListener("mousemove", (e) => {
 });
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Importers and Exporters
 
@@ -189,8 +183,6 @@ for (const obj of importedScene.getObjects()) {
     // Add objects to your scene...
 }
 ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting Started
 
@@ -231,8 +223,6 @@ npm run lint:fix  # Auto-fix lint issues
 npm run clean     # Remove dist/
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Usage
 
 The default entry point (`src/index.ts`) launches a demo scene on a canvas element with id `canvas`:
@@ -261,7 +251,6 @@ function loop() {
 requestAnimationFrame(loop);
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Structure
 
@@ -279,14 +268,10 @@ src/
     scenes/          Demo scenes
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- MARKDOWN LINKS -->
-[license-shield]: https://img.shields.io/github/license/mindmatrix/junk-engine.svg?style=for-the-badge
-[license-url]: https://github.com/mindmatrix/junk-engine/blob/master/LICENSE.txt
+[license-shield]: https://img.shields.io/github/license/mind-matrix/JunkEngine?style=for-the-badge
+[license-url]: https://github.com/mind-matrix/JunkEngine/blob/master/LICENSE.txt

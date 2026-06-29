@@ -2,7 +2,11 @@
   "name": "@mindmatrix/junk-engine",
   "version": "0.0.1",
   "description": "JunkEngine - A scrappy hacky game engine that gets the job done (mostly).",
-  "main": "dist/bundle.js",
+  "main": "dist/engine/index.js",
+  "types": "dist/engine/index.d.ts",
+  "files": [
+    "dist/engine/**/*"
+  ],
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development",

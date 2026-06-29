@@ -3,47 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JunkEngine Studio</title>
+    <title>JunkEngine</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #e8e8e8;
+            min-height: 100vh;
+            line-height: 1.6;
         }
 
-        .container {
+        header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            padding: 100px 24px 80px;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
+        header img {
+            width: 72px;
+            height: auto;
+            margin-bottom: 28px;
+            opacity: 0.9;
         }
 
-        #canvas {
-            border: 2px solid #333;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #fff;
         }
 
-        .info {
-            color: #666;
-            font-size: 14px;
+        header p {
+            margin-top: 12px;
+            color: #777;
+            font-size: 1rem;
+            max-width: 420px;
             text-align: center;
+        }
+
+        .nav-links {
+            margin-top: 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-bottom: 1px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .demo-card {
+            background: #161616;
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 28px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+        }
+
+        .demo-card:hover {
+            background: #1c1c1c;
+            border-color: #333;
+            transform: translateY(-1px);
+        }
+
+        .demo-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .demo-card p {
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .demo-card .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .demo-card .tag {
+            padding: 3px 8px;
+            background: #222;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #999;
+            letter-spacing: 0.5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid #1a1a1a;
+            color: #444;
+            font-size: 0.8rem;
+        }
+
+        footer a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: #fff;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Application</h1>
-    <canvas id="canvas" width="800" height="600"></canvas>
-    <div class="info">
-        <p>W A S D to move camera · Click to enable mouse look (inverted Y-axis) · Shift to go down and Space to go up</p>
-    </div>
-</div>
+    <header>
+        <img src="images/logo.svg" alt="JunkEngine Logo">
+        <h1>JunkEngine</h1>
+        <p>A scrappy, hacky game engine that gets the job done.</p>
+        <nav class="nav-links">
+            <a href="https://github.com/mind-matrix/JunkEngine">Source</a>
+            <a href="https://github.com/mind-matrix/JunkEngine/blob/master/LICENSE.txt">License</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="section-label">Demos</div>
+        <div class="demo-grid" id="demo-grid"></div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/mind-matrix/JunkEngine">GitHub</a></p>
+    </footer>
 </body>
 </html>

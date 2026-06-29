@@ -4,7 +4,7 @@ import { AntialiasingPostProcessor, AAMethod } from "@/engine/postprocessors";
 import { TurboRenderer } from "@/engine/renderers";
 import { vec3Cross, vec3Normalize, vec3Subtract, transformBoundingSphere } from "@/engine/utilities/render-utils";
 
-let CAMERA_SPEED = 0.05;
+const SCENE_NAME = "Tank";
 const MOUSE_SENSITIVITY = 0.002;
 const GLB_PATH = "models/tank/source/tank.glb";
 const AUDIO_PATHS = [
@@ -12,8 +12,10 @@ const AUDIO_PATHS = [
     "audio/dstechnician-green-sky-125179.mp3"
 ];
 
-export function createTankScene(): { scene: Scene; start: (canvas: HTMLCanvasElement) => Promise<void> } {
-    const scene = new Scene("TVScene");
+let cameraSpeed = 0.05;
+
+export function createTankScene(): { start: (canvas: HTMLCanvasElement) => Promise<void> } {
+    const scene = new Scene(SCENE_NAME);
     scene.shadingMode = ShadingMode.PBR;
 
     async function start(canvas: HTMLCanvasElement): Promise<void> {
@@ -119,7 +121,7 @@ export function createTankScene(): { scene: Scene; start: (canvas: HTMLCanvasEle
         requestAnimationFrame(loop);
     }
 
-    return { scene, start };
+    return { start };
 }
 
 function updateCamera(scene: Scene, keyboard: KeyboardInputController): void {
@@ -134,12 +136,12 @@ function updateCamera(scene: Scene, keyboard: KeyboardInputController): void {
     right[1] = 0;
     vec3Normalize(right, right);
 
-    if (keyboard.isDown("KeyW")) { moveCamera(cam, forward, CAMERA_SPEED); }
-    if (keyboard.isDown("KeyS")) { moveCamera(cam, forward, -CAMERA_SPEED); }
-    if (keyboard.isDown("KeyA")) { moveCamera(cam, right, -CAMERA_SPEED); }
-    if (keyboard.isDown("KeyD")) { moveCamera(cam, right, CAMERA_SPEED); }
-    if (keyboard.isDown("Space")) { moveCameraY(cam, CAMERA_SPEED); }
-    if (keyboard.isDown("ShiftLeft") || keyboard.isDown("ShiftRight")) { moveCameraY(cam, -CAMERA_SPEED); }
+    if (keyboard.isDown("KeyW")) { moveCamera(cam, forward, cameraSpeed); }
+    if (keyboard.isDown("KeyS")) { moveCamera(cam, forward, -cameraSpeed); }
+    if (keyboard.isDown("KeyA")) { moveCamera(cam, right, -cameraSpeed); }
+    if (keyboard.isDown("KeyD")) { moveCamera(cam, right, cameraSpeed); }
+    if (keyboard.isDown("Space")) { moveCameraY(cam, cameraSpeed); }
+    if (keyboard.isDown("ShiftLeft") || keyboard.isDown("ShiftRight")) { moveCameraY(cam, -cameraSpeed); }
 }
 
 function moveCamera(cam: { position: Float32Array; target: Float32Array }, dir: Float32Array, amount: number): void {
@@ -203,7 +205,7 @@ function frameCameraToScene(scene: Scene): void {
     scene.camera.far = dist * 50;
 
     // Scale movement speed to model size
-    CAMERA_SPEED = dist * 0.003;
+    cameraSpeed = dist * 0.003;
 
     // --- Lighting: scaled to model bounds ---
     // Key light — moderate intensity for clean toon bands

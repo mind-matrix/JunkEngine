@@ -7,7 +7,7 @@ module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
 
     return {
-        entry: './src/index.ts',
+        entry: './src/demo.ts',
         output: {
             filename: 'bundle.js',
             path: path.resolve(__dirname, 'dist'),
@@ -43,6 +43,12 @@ module.exports = (env, argv) => {
             new HtmlWebpackPlugin({
                 template: './public/index.html',
                 filename: 'index.html',
+                inject: 'body',
+            }),
+            new HtmlWebpackPlugin({
+                template: './public/demo.html',
+                filename: 'demo.html',
+                inject: 'body',
             }),
             new CopyWebpackPlugin({
                 patterns: [
@@ -50,12 +56,12 @@ module.exports = (env, argv) => {
                         from: 'public',
                         to: '.',
                         globOptions: {
-                            ignore: ['**/index.html'],
+                            ignore: ['**/index.html', '**/demo.html'],
                         },
                     },
                     {
                         from: 'assets',
-                        to: '.'
+                        to: '.',
                     },
                 ],
             }),
