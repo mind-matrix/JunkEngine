@@ -51,17 +51,17 @@ export class KeyboardInputController extends InputController {
         this.held.clear();
     }
 
-    poll(): KeyboardState {
+    public poll(): KeyboardState {
         return { held: this.held, pressed: this.pressed, released: this.released };
     }
 
-    resetFrame(): void {
+    public resetFrame(): void {
         this.pressed.clear();
         this.released.clear();
     }
 
     /** Convenience: returns `true` if the key is currently held. */
-    isDown(code: string): boolean {
+    public isDown(code: string): boolean {
         return this.held.has(code);
     }
 }

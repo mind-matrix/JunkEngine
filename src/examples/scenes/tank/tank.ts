@@ -1,24 +1,27 @@
-import { createDirectionalLight, createPointLight, GltfImporter, rotateCamera, Scene, ShadingMode } from "@/engine";
-import { KeyboardInputController, MouseInputController, AudioOutputController } from "@/engine/controllers";
+import { createDirectionalLight, createPointLight, GltfImporter, Scene, ShadingMode } from "@/engine";
+import { AudioOutputController } from "@/engine/controllers";
 import { AntialiasingPostProcessor, AAMethod } from "@/engine/postprocessors";
 import { TurboRenderer } from "@/engine/renderers";
-import { vec3Cross, vec3Normalize, vec3Subtract, transformBoundingSphere } from "@/engine/utilities/render-utils";
+import { transformBoundingSphere } from "@/engine/utilities/render-utils";
+import { FPSController } from "@/examples/commons/FPSController";
+import { VirtualJoystick } from "@/examples/commons/VirtualJoystick";
 
 const SCENE_NAME = "Tank";
-const MOUSE_SENSITIVITY = 0.002;
 const GLB_PATH = "models/tank/source/tank.glb";
 const AUDIO_PATHS = [
     "audio/oceanking-sky-farm-219728.mp3",
     "audio/dstechnician-green-sky-125179.mp3"
 ];
 
-let cameraSpeed = 0.05;
-
 export function createTankScene(): { start: (canvas: HTMLCanvasElement) => Promise<void> } {
     const scene = new Scene(SCENE_NAME);
     scene.shadingMode = ShadingMode.PBR;
 
     async function start(canvas: HTMLCanvasElement): Promise<void> {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(canvas.clientWidth * dpr);
+        canvas.height = Math.round(canvas.clientHeight * dpr);
+
         const renderer = await TurboRenderer.create(canvas);
 
         const fxaa = new AntialiasingPostProcessor(
@@ -57,13 +60,19 @@ export function createTankScene(): { start: (canvas: HTMLCanvasElement) => Promi
             document.addEventListener("keydown", startMusic, { once: true });
         }).catch((err) => console.warn("Failed to load music:", err));
 
-        const keyboard = new KeyboardInputController();
-        keyboard.attach(window);
+        const resizeObserver = new ResizeObserver(() => {
+            const w = Math.round(canvas.clientWidth * dpr);
+            const h = Math.round(canvas.clientHeight * dpr);
+            if (w !== canvas.width || h !== canvas.height) {
+                renderer.resize(w, h);
+                fxaa.resize(w, h);
+            }
+        });
+        resizeObserver.observe(canvas);
 
-        const mouse = new MouseInputController();
-        mouse.attach(canvas);
-
-        canvas.addEventListener("click", () => { canvas.requestPointerLock(); });
+        const joystick = new VirtualJoystick({ position: "left", size: 120 });
+        const fps = new FPSController(scene.camera, { joystick });
+        fps.attach(canvas);
 
         let loaded = false;
 
@@ -99,21 +108,16 @@ export function createTankScene(): { start: (canvas: HTMLCanvasElement) => Promi
                         dirty: obj.dirty,
                     });
                 }
-                frameCameraToScene(scene);
+                fps.setMoveSpeed(frameCameraToScene(scene));
                 loaded = true;
             })
-            .catch((err) => { console.error("Failed to load TV model:", err); });
+            .catch((err) => { console.error("Failed to load tank model:", err); });
 
         function loop(): void {
             if (loaded) {
-                const mouseState = mouse.poll();
-                if (document.pointerLockElement === canvas) {
-                    rotateCamera(scene.camera, -mouseState.deltaX * MOUSE_SENSITIVITY, mouseState.deltaY * MOUSE_SENSITIVITY);
-                }
-                updateCamera(scene, keyboard);
+                fps.poll();
             }
-            mouse.resetFrame();
-            keyboard.resetFrame();
+            fps.resetFrame();
             renderer.render(scene);
             requestAnimationFrame(loop);
         }
@@ -124,39 +128,6 @@ export function createTankScene(): { start: (canvas: HTMLCanvasElement) => Promi
     return { start };
 }
 
-function updateCamera(scene: Scene, keyboard: KeyboardInputController): void {
-    const cam = scene.camera;
-    const forward = new Float32Array(3);
-    vec3Subtract(forward, cam.target, cam.position);
-    forward[1] = 0;
-    vec3Normalize(forward, forward);
-
-    const right = new Float32Array(3);
-    vec3Cross(right, forward, cam.up);
-    right[1] = 0;
-    vec3Normalize(right, right);
-
-    if (keyboard.isDown("KeyW")) { moveCamera(cam, forward, cameraSpeed); }
-    if (keyboard.isDown("KeyS")) { moveCamera(cam, forward, -cameraSpeed); }
-    if (keyboard.isDown("KeyA")) { moveCamera(cam, right, -cameraSpeed); }
-    if (keyboard.isDown("KeyD")) { moveCamera(cam, right, cameraSpeed); }
-    if (keyboard.isDown("Space")) { moveCameraY(cam, cameraSpeed); }
-    if (keyboard.isDown("ShiftLeft") || keyboard.isDown("ShiftRight")) { moveCameraY(cam, -cameraSpeed); }
-}
-
-function moveCamera(cam: { position: Float32Array; target: Float32Array }, dir: Float32Array, amount: number): void {
-    const dx = (dir[0] ?? 0) * amount;
-    const dz = (dir[2] ?? 0) * amount;
-    cam.position[0] = (cam.position[0] ?? 0) + dx;
-    cam.position[2] = (cam.position[2] ?? 0) + dz;
-    cam.target[0] = (cam.target[0] ?? 0) + dx;
-    cam.target[2] = (cam.target[2] ?? 0) + dz;
-}
-
-function moveCameraY(cam: { position: Float32Array; target: Float32Array }, amount: number): void {
-    cam.position[1] = (cam.position[1] ?? 0) + amount;
-    cam.target[1] = (cam.target[1] ?? 0) + amount;
-}
 
 /** Returns true if a texture is nearly all black (< 1% non-black pixels). */
 function isTextureEmpty(tex: { pixels: Uint8ClampedArray; width: number; height: number }): boolean {
@@ -169,8 +140,7 @@ function isTextureEmpty(tex: { pixels: Uint8ClampedArray; width: number; height:
     return sampled > 0 && bright / sampled < 0.05;
 }
 
-/** Frames camera and sets up lighting based on the scene's world-space bounding box. */
-function frameCameraToScene(scene: Scene): void {
+function frameCameraToScene(scene: Scene): number {
     let minX = Infinity, minY = Infinity, minZ = Infinity;
     let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 
@@ -190,7 +160,6 @@ function frameCameraToScene(scene: Scene): void {
     const sx = maxX - minX;
     const sy = maxY - minY;
     const sz = maxZ - minZ;
-    const radius = Math.sqrt(sx * sx + sy * sy + sz * sz) / 2;
 
     // --- Camera: fit model to viewport using FOV ---
     // Use the largest axis extent so the model fills the frame regardless of shape
@@ -204,8 +173,7 @@ function frameCameraToScene(scene: Scene): void {
     scene.camera.near = dist * 0.005;
     scene.camera.far = dist * 50;
 
-    // Scale movement speed to model size
-    cameraSpeed = dist * 0.003;
+    const cameraSpeed = dist * 0.003;
 
     // --- Lighting: scaled to model bounds ---
     // Key light — moderate intensity for clean toon bands
@@ -221,4 +189,6 @@ function frameCameraToScene(scene: Scene): void {
         [cx, cy + maxExtent * 0.8, cz],
         { intensity: maxExtent * 0.3, color: [1, 0.97, 0.93], attenuation: { constant: 1, linear: attLin, quadratic: attQuad } },
     ));
+
+    return cameraSpeed;
 }

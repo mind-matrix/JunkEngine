@@ -108,6 +108,12 @@ export class TurboRenderer extends Renderer<GPUCanvasContext> {
     /** The depth texture from the scene pass. */
     getDepthTexture(): GPUTexture { return this.turbo.depthTexture; }
 
+    resize(width: number, height: number): void {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.turbo = createTurboPipeline(this.device, this.turbo.canvasFormat, width, height, this.currentSampleCount);
+    }
+
     static async create(canvas: HTMLCanvasElement): Promise<TurboRenderer> {
         if (!navigator.gpu) throw new Error("WebGPU not supported in this browser");
         const adapter = await navigator.gpu.requestAdapter();
